@@ -1,0 +1,25 @@
+name: Docker Build and Push
+
+on:
+  push:
+
+jobs:
+  docker-build-push:
+    name: Build Tag and Push Docker Image
+
+    runs-on: ubuntu-latest
+
+    environment:
+      name: production
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Docker Build Tag and Push
+        uses: ./.github/actions/docker-build-push
+        with:
+          docker_username: ${{ secrets.DOCKERHUB_USERNAME }}
+          docker_password: ${{ secrets.DOCKERHUB_TOKEN }}
+          image_name: node-docker-app
+          image_tag: ${{ github.sha }}

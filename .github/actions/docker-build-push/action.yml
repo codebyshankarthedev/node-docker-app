@@ -1,0 +1,54 @@
+name: Docker Build Tag and Push
+description: Build, tag and push Docker image to Docker Hub
+
+inputs:
+  docker_username:
+    description: Docker Hub username
+    required: true
+
+  docker_password:
+    description: Docker Hub access token
+    required: true
+
+  image_name:
+    description: Docker image name
+    required: true
+
+  image_tag:
+    description: Docker image tag
+    required: true
+
+runs:
+  using: composite
+
+  steps:
+    - name: Login to Docker Hub
+      shell: bash
+      run: |
+        echo "${{ inputs.docker_password }}" | \
+        docker login \
+          --username "${{ inputs.docker_username }}" \
+          --password-stdin
+
+    - name: Build Docker image
+      shell: bash
+      run: |
+        docker build \
+          -t "${{ inputs.docker_username }}/${{ inputs.image_name }}:${{ inputs.image_tag }}" \
+          .
+
+    - name: Tag Docker image
+      shell: bash
+      run: |
+        docker tag \
+          "${{ inputs.docker_username }}/${{ inputs.image_name }}:${{ inputs.image_tag }}" \
+          "${{ inputs.docker_username }}/${{ inputs.image_name }}:latest"
+
+    - name: Push Docker image
+      shell: bash
+      run: |
+        docker push \
+          "${{ inputs.docker_username }}/${{ inputs.image_name }}:${{ inputs.image_tag }}"
+
+        docker push \
+          "${{ inputs.docker_username }}/${{ inputs.image_name }}:latest"
